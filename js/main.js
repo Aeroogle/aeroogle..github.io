@@ -50,49 +50,26 @@ $(document).ready(function () {
 	 * 改用 JsonBird：https://bird.ioliu.cn/
 	 * 
 	 */
-// 设置API参数
-var date = 'today'; // 可以是 'today', 'yesterday' 或 '20240730' 格式的日期
-var lang = 'zh-cn'; // 语言代码，默认为 'zh-cn'
-var mode = 'FHD'; // 分辨率模式，默认为 'FHD'
-
-// 构建API URL
-var apiUrl = `https://dailybing.com/api/v1/${date}/${lang}/${mode}`;
-
-// 获取页面元素
-var $panel =$('#panel');
-
-// 尝试从sessionStorage获取图片URLs和索引
-var imgUrls = JSON.parse(sessionStorage.getItem("imgUrls"));
-var index = parseInt(sessionStorage.getItem("index"), 10);
-
-// 检查是否需要重新获取图片URLs
-if (!imgUrls || index === undefined) {
-    imgUrls = new Array();
-    index = 0;
-
-    // 发送请求到API获取图片信息
-    $.get(apiUrl, function (result) {
-        // 假设result包含图片的URL，这里需要根据实际API返回结果调整
-        if (result && result.imageUrl) {
-            imgUrls.push(result.imageUrl); // 将获取到的图片URL添加到数组中
-            var imgUrl = imgUrls[index]; // 获取当前索引的图片URL
-            $panel.css("background", "url('" + imgUrl + "') center center no-repeat #666"); // 设置背景图片
-            $panel.css("background-size", "cover"); // 设置背景图片大小为覆盖整个元素
-            sessionStorage.setItem("imgUrls", JSON.stringify(imgUrls)); // 将图片URLs存储到sessionStorage
-            sessionStorage.setItem("index", index.toString()); // 将索引存储到sessionStorage
-        } else {
-            console.error('无法获取图片URL');
-        }
-    }).fail(function () {
-        console.error('API请求失败');
-    });
-} else {
-    // 如果sessionStorage中有图片URLs和索引，则直接使用
-    var imgUrl = imgUrls[index];
-    $panel.css("background", "url('" + imgUrl + "') center center no-repeat #666");
-    $panel.css("background-size", "cover");
-}
-
+	var url = 'https://bird.ioliu.cn/v1/?url=https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8';
+	var imgUrls = JSON.parse(sessionStorage.getItem("imgUrls"));
+	var index = sessionStorage.getItem("index");
+	var $panel = $('#panel');
+	if (imgUrls == null) {
+		imgUrls = new Array();
+		index = 0;
+		$.get(url, function (result) {
+			images = result.images;
+			for (let i = 0; i < images.length; i++) {
+				const item = images[i];
+				imgUrls.push(item.url);
+			}
+			var imgUrl = imgUrls[index];
+			var url = "https://www.bing.com" + imgUrl;
+			$panel.css("background", "url('" + url + "') center center no-repeat #666");
+			$panel.css("background-size", "cover");
+			sessionStorage.setItem("imgUrls", JSON.stringify(imgUrls));
+			sessionStorage.setItem("index", index);
+		});
 	} else {
 		if (index == 7)
 			index = 0;
